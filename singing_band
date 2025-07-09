@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+  <body>
+    <a-scene mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/band.mind;" 
+             color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+             vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+             
+      <a-assets>
+        <!-- 3D Models -->
+        <a-asset-item id="bearModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/bear/scene.gltf"></a-asset-item>
+        <a-asset-item id="raccoonModel" src="https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/band-example/raccoon/scene.gltf"></a-asset-item>
+        
+        <!-- MP3 Audio -->
+        <audio id="raccoonSound" src="raccoon.mp3" preload="auto"></audio>
+        <audio id="bearSound" src="bear.mp3" preload="auto"></audio>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <!-- Raccoon Model (targetIndex: 0) -->
+      <a-entity mindar-image-target="targetIndex: 0" id="raccoonTarget">
+        <a-gltf-model id="raccoonModel" src="#raccoonModel" position="0 -0.25 0" scale="0.05 0.05 0.05"
+                      rotation="0 0 0" animation-mixer
+                      sound="src: #raccoonSound; autoplay: false;">
+        </a-gltf-model>
+      </a-entity>
+
+      <!-- Bear Model (targetIndex: 1) -->
+      <a-entity mindar-image-target="targetIndex: 1" id="bearTarget">
+        <a-gltf-model id="bearModel" src="#bearModel" position="0 -0.25 0" scale="0.05 0.05 0.05"
+                      rotation="0 0 0" animation-mixer
+                      sound="src: #bearSound; autoplay: false;">
+        </a-gltf-model>
+      </a-entity>
+    </a-scene>
+
+    <script>
+      AFRAME.registerComponent('play-stop-sound', {
+        init: function () {
+          const model = this.el.querySelector('a-gltf-model');
+          if (!model) return;
+
+          this.el.addEventListener('targetFound', () => {
+            if (model.components.sound) {
+              model.components.sound.playSound();
+            }
+          });
+
+          this.el.addEventListener('targetLost', () => {
+            if (model.components.sound) {
+              model.components.sound.stopSound();
+            }
+          });
+        }
+      });
+
+      // Attach the component to both targets
+      document.querySelector('#raccoonTarget').setAttribute('play-stop-sound', '');
+      document.querySelector('#bearTarget').setAttribute('play-stop-sound', '');
+    </script>
+  </body>
+</html>
